@@ -21,19 +21,23 @@ A test interface for a behavioral system using Raspberry Pi 5 with OLED displays
    # Select: Finish
    ```
 
-2. Add user to required groups:
+2. Install system packages:
+   ```bash
+   sudo apt-get update
+   sudo apt-get install -y python3-gpiozero i2c-tools
+   ```
+
+3. Add user to I2C group:
    ```bash
    sudo usermod -aG i2c $USER
    ```
 
-3. Install system GPIO package for Raspberry Pi 5:
+4. Verify setup (after reboot):
    ```bash
-   sudo apt-get update
-   sudo apt-get install -y python3-lgpio
-   ```
-
-4. Verify I2C devices:
-   ```bash
+   # Test GPIO functionality
+   python gpio_test.py
+   
+   # Check I2C devices
    i2cdetect -y 1
    ```
 
@@ -86,6 +90,7 @@ The GUI interface provides:
 .
 ├── README.md
 ├── requirements.txt
+├── gpio_test.py
 ├── test_interface.py
 └── hardware/
     ├── __init__.py
