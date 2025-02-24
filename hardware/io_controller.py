@@ -1,7 +1,7 @@
 try:
-    from board import SCL, SDA, D23, D24, D17
+    import RPi.GPIO as GPIO
+    from board import SCL, SDA
     import busio
-    import digitalio
     import adafruit_ssd1306
     SIMULATION_MODE = False
 except (ImportError, NotImplementedError):
@@ -10,9 +10,14 @@ except (ImportError, NotImplementedError):
 
 class IOController:
     def __init__(self):
+        # Define GPIO pins
+        self.PIN_LEVER_RIGHT = 23
+        self.PIN_LEVER_LEFT = 24
+        self.PIN_NOSE_POKE = 17
+        
         if not SIMULATION_MODE:
             try:
-                # Setup I2C - explicitly use bus 1
+                # Setup I2C
                 i2c = busio.I2C(SCL, SDA)
                 
                 # Try to initialize each display independently
@@ -20,26 +25,14 @@ class IOController:
                 self.display_right = self._init_display(i2c, 0x3D, "right")
                 
                 try:
-                    # Ensure GPIO permissions
-                    import os
-                    if not os.access("/dev/gpiomem", os.R_OK | os.W_OK):
-                        raise PermissionError("No access to GPIO. Run 'sudo usermod -aG gpio $USER' and reboot.")
-                    
-                    # Setup GPIO inputs with pull-ups
-                    self.lever_right = digitalio.DigitalInOut(D23)
-                    self.lever_right.direction = digitalio.Direction.INPUT
-                    self.lever_right.pull = digitalio.Pull.UP
-                    
-                    self.lever_left = digitalio.DigitalInOut(D24)
-                    self.lever_left.direction = digitalio.Direction.INPUT
-                    self.lever_left.pull = digitalio.Pull.UP
-                    
-                    self.nose_poke = digitalio.DigitalInOut(D17)
-                    self.nose_poke.direction = digitalio.Direction.INPUT
-                    self.nose_poke.pull = digitalio.Pull.UP
+                    # Setup GPIO
+                    GPIO.setmode(GPIO.BCM)
+                    GPIO.setup(self.PIN_LEVER_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+                    GPIO.setup(self.PIN_LEVER_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+                    GPIO.setup(self.PIN_NOSE_POKE, GPIO.IN, pull_up_down=GPIO.PUD_UP)
                     
                     self._simulated_inputs = False
-                except (ValueError, OSError, PermissionError) as e:
+                except Exception as e:
                     print(f"Failed to initialize GPIO inputs: {e}")
                     print("Switching to simulation mode for inputs")
                     self._init_simulated_inputs()
@@ -80,9 +73,9 @@ class IOController:
     def get_input_states(self):
         if not hasattr(self, '_simulated_inputs') or not self._simulated_inputs:
             return {
-                'right_lever': not self.lever_right.value,  # Inverted due to pull-up
-                'left_lever': not self.lever_left.value,
-                'nose_poke': not self.nose_poke.value
+                'right_lever': not GPIO.input(self.PIN_LEVER_RIGHT),  # Inverted due to pull-up
+                'left_lever': not GPIO.input(self.PIN_LEVER_LEFT),
+                'nose_poke': not GPIO.input(self.PIN_NOSE_POKE)
             }
         else:
             return self._simulated_states
@@ -92,6 +85,11 @@ class IOController:
         self.display_right.fill(0)
         self.display_left.show()
         self.display_right.show()
+    
+    def __del__(self):
+        """Cleanup GPIO on object destruction"""
+        if not SIMULATION_MODE and not hasattr(self, '_simulated_inputs'):
+            GPIO.cleanup()
 
 class DummyDisplay:
     def __init__(self, width, height):
