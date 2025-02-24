@@ -6,7 +6,7 @@ A test interface for a behavioral system using Raspberry Pi 5 with OLED displays
 
 - 2x OLED displays (128x64, SSD1306)
   - Left display: I2C address 0x3C
-  - Right display: I2C address 0x3D
+  - Right display: I2C address 0x3D (hardware modification)
 - GPIO inputs (all with pull-up)
   - GPIO 23: Right lever
   - GPIO 24: Left lever
