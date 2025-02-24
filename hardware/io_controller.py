@@ -31,8 +31,8 @@ class IOController:
                     # Configure pins as inputs with pull-ups
                     for pin in [self.PIN_LEVER_RIGHT, self.PIN_LEVER_LEFT, self.PIN_NOSE_POKE]:
                         lgpio.gpio_claim_input(self.gpio_handle, pin)
-                        # Set internal pull-up (PUD_UP = 2 in lgpio)
-                        lgpio.gpio_set_pull_up_down(self.gpio_handle, pin, 2)
+                        # Set pull-up (BIAS_PULL_UP = 1 in lgpio)
+                        lgpio.gpio_set_bias(self.gpio_handle, pin, lgpio.SET_BIAS_PULL_UP)
                     
                     self._simulated_inputs = False
                     print("GPIO inputs initialized successfully")
