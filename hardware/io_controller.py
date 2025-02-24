@@ -15,15 +15,9 @@ class IOController:
                 # Setup I2C
                 i2c = busio.I2C(SCL, SDA)
                 
-                try:
-                    # Setup displays
-                    self.display_left = adafruit_ssd1306.SSD1306_I2C(128, 64, i2c, addr=0x3C)
-                    self.display_right = adafruit_ssd1306.SSD1306_I2C(128, 64, i2c, addr=0x3D)
-                except (ValueError, OSError) as e:
-                    print(f"Failed to initialize I2C displays: {e}")
-                    print("Switching to simulation mode for displays")
-                    self.display_left = DummyDisplay(128, 64)
-                    self.display_right = DummyDisplay(128, 64)
+                # Try to initialize each display independently
+                self.display_left = self._init_display(i2c, 0x3C, "left")
+                self.display_right = self._init_display(i2c, 0x3D, "right")
                 
                 try:
                     # Setup GPIO inputs with pull-ups
@@ -51,6 +45,17 @@ class IOController:
                 self._init_simulation()
         else:
             self._init_simulation()
+    
+    def _init_display(self, i2c, address, name):
+        """Initialize a single display, return DummyDisplay if fails"""
+        try:
+            display = adafruit_ssd1306.SSD1306_I2C(128, 64, i2c, addr=address)
+            print(f"Successfully initialized {name} display at address 0x{address:02X}")
+            return display
+        except (ValueError, OSError) as e:
+            print(f"Failed to initialize {name} display at address 0x{address:02X}: {e}")
+            print(f"Using simulation mode for {name} display")
+            return DummyDisplay(128, 64)
     
     def _init_simulated_inputs(self):
         """Initialize just the input simulation"""
