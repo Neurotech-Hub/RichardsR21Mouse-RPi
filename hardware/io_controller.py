@@ -12,7 +12,7 @@ class IOController:
     def __init__(self):
         if not SIMULATION_MODE:
             try:
-                # Setup I2C
+                # Setup I2C - explicitly use bus 1
                 i2c = busio.I2C(SCL, SDA)
                 
                 # Try to initialize each display independently
@@ -20,6 +20,11 @@ class IOController:
                 self.display_right = self._init_display(i2c, 0x3D, "right")
                 
                 try:
+                    # Ensure GPIO permissions
+                    import os
+                    if not os.access("/dev/gpiomem", os.R_OK | os.W_OK):
+                        raise PermissionError("No access to GPIO. Run 'sudo usermod -aG gpio $USER' and reboot.")
+                    
                     # Setup GPIO inputs with pull-ups
                     self.lever_right = digitalio.DigitalInOut(D23)
                     self.lever_right.direction = digitalio.Direction.INPUT
@@ -34,7 +39,7 @@ class IOController:
                     self.nose_poke.pull = digitalio.Pull.UP
                     
                     self._simulated_inputs = False
-                except (ValueError, OSError) as e:
+                except (ValueError, OSError, PermissionError) as e:
                     print(f"Failed to initialize GPIO inputs: {e}")
                     print("Switching to simulation mode for inputs")
                     self._init_simulated_inputs()

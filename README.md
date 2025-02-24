@@ -12,6 +12,35 @@ A test interface for a behavioral system using Raspberry Pi 5 with OLED displays
   - GPIO 24: Left lever
   - GPIO 17: Nose poke
 
+## Initial Raspberry Pi Configuration
+
+1. Enable required interfaces:
+   ```bash
+   sudo raspi-config
+   # Navigate to: Interface Options -> I2C -> Enable -> Yes
+   # Navigate to: Interface Options -> GPIO -> Enable -> Yes
+   # Select: Finish
+   ```
+
+2. Add user to required groups:
+   ```bash
+   sudo usermod -aG gpio,i2c $USER
+   ```
+
+3. Reboot the Raspberry Pi:
+   ```bash
+   sudo reboot
+   ```
+
+4. Verify permissions (after reboot):
+   ```bash
+   # Check I2C devices
+   i2cdetect -y 1
+   
+   # Check GPIO access
+   ls -l /dev/gpiomem
+   ```
+
 ## Software Setup
 
 1. Create and activate virtual environment:
