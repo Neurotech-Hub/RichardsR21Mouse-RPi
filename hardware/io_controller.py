@@ -1,5 +1,5 @@
 try:
-    import lgpio
+    from gpiozero import Button
     from board import SCL, SDA
     import busio
     import adafruit_ssd1306
@@ -25,14 +25,10 @@ class IOController:
                 self.display_right = self._init_display(i2c, 0x3D, "right")
                 
                 try:
-                    # Setup GPIO using lgpio
-                    self.gpio_handle = lgpio.gpiochip_open(0)
-                    
-                    # Configure pins as inputs with pull-ups
-                    for pin in [self.PIN_LEVER_RIGHT, self.PIN_LEVER_LEFT, self.PIN_NOSE_POKE]:
-                        lgpio.gpio_claim_input(self.gpio_handle, pin)
-                        # Set pull-up (BIAS_PULL_UP = 1 in lgpio)
-                        lgpio.gpio_set_bias(self.gpio_handle, pin, lgpio.SET_BIAS_PULL_UP)
+                    # Setup GPIO using gpiozero (pull_up=True by default)
+                    self.lever_right = Button(self.PIN_LEVER_RIGHT)
+                    self.lever_left = Button(self.PIN_LEVER_LEFT)
+                    self.nose_poke = Button(self.PIN_NOSE_POKE)
                     
                     self._simulated_inputs = False
                     print("GPIO inputs initialized successfully")
@@ -78,9 +74,9 @@ class IOController:
     def get_input_states(self):
         if not hasattr(self, '_simulated_inputs') or not self._simulated_inputs:
             return {
-                'right_lever': not lgpio.gpio_read(self.gpio_handle, self.PIN_LEVER_RIGHT),  # Inverted due to pull-up
-                'left_lever': not lgpio.gpio_read(self.gpio_handle, self.PIN_LEVER_LEFT),
-                'nose_poke': not lgpio.gpio_read(self.gpio_handle, self.PIN_NOSE_POKE)
+                'right_lever': self.lever_right.is_pressed,
+                'left_lever': self.lever_left.is_pressed,
+                'nose_poke': self.nose_poke.is_pressed
             }
         else:
             return self._simulated_states
