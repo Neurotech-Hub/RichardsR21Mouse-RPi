@@ -18,19 +18,18 @@ A test interface for a behavioral system using Raspberry Pi 5 with OLED displays
    ```bash
    sudo raspi-config
    # Navigate to: Interface Options -> I2C -> Enable -> Yes
-   # Navigate to: Interface Options -> GPIO -> Enable -> Yes
    # Select: Finish
    ```
 
 2. Add user to required groups:
    ```bash
-   sudo usermod -aG gpio,i2c $USER
+   sudo usermod -aG i2c $USER
    ```
 
-3. Install system GPIO package:
+3. Install system GPIO package for Raspberry Pi 5:
    ```bash
    sudo apt-get update
-   sudo apt-get install python3-rpi.gpio
+   sudo apt-get install -y python3-lgpio
    ```
 
 4. Verify I2C devices:

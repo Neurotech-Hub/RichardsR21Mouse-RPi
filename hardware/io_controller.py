@@ -1,5 +1,5 @@
 try:
-    import RPi.GPIO as GPIO
+    import lgpio
     from board import SCL, SDA
     import busio
     import adafruit_ssd1306
@@ -25,13 +25,18 @@ class IOController:
                 self.display_right = self._init_display(i2c, 0x3D, "right")
                 
                 try:
-                    # Setup GPIO
-                    GPIO.setmode(GPIO.BCM)
-                    GPIO.setup(self.PIN_LEVER_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-                    GPIO.setup(self.PIN_LEVER_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-                    GPIO.setup(self.PIN_NOSE_POKE, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+                    # Setup GPIO using lgpio
+                    self.gpio_handle = lgpio.gpiochip_open(0)
+                    
+                    # Configure pins as inputs with pull-ups
+                    for pin in [self.PIN_LEVER_RIGHT, self.PIN_LEVER_LEFT, self.PIN_NOSE_POKE]:
+                        lgpio.gpio_claim_input(self.gpio_handle, pin)
+                        # Set internal pull-up
+                        lgpio.gpio_pull_up(self.gpio_handle, pin)
                     
                     self._simulated_inputs = False
+                    print("GPIO inputs initialized successfully")
+                    
                 except Exception as e:
                     print(f"Failed to initialize GPIO inputs: {e}")
                     print("Switching to simulation mode for inputs")
@@ -73,9 +78,9 @@ class IOController:
     def get_input_states(self):
         if not hasattr(self, '_simulated_inputs') or not self._simulated_inputs:
             return {
-                'right_lever': not GPIO.input(self.PIN_LEVER_RIGHT),  # Inverted due to pull-up
-                'left_lever': not GPIO.input(self.PIN_LEVER_LEFT),
-                'nose_poke': not GPIO.input(self.PIN_NOSE_POKE)
+                'right_lever': not lgpio.gpio_read(self.gpio_handle, self.PIN_LEVER_RIGHT),  # Inverted due to pull-up
+                'left_lever': not lgpio.gpio_read(self.gpio_handle, self.PIN_LEVER_LEFT),
+                'nose_poke': not lgpio.gpio_read(self.gpio_handle, self.PIN_NOSE_POKE)
             }
         else:
             return self._simulated_states
@@ -89,7 +94,10 @@ class IOController:
     def __del__(self):
         """Cleanup GPIO on object destruction"""
         if not SIMULATION_MODE and not hasattr(self, '_simulated_inputs'):
-            GPIO.cleanup()
+            try:
+                lgpio.gpiochip_close(self.gpio_handle)
+            except:
+                pass
 
 class DummyDisplay:
     def __init__(self, width, height):
