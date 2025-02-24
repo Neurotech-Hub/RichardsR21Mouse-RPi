@@ -27,18 +27,14 @@ A test interface for a behavioral system using Raspberry Pi 5 with OLED displays
    sudo usermod -aG gpio,i2c $USER
    ```
 
-3. Enable and start GPIO system service:
+3. Install system GPIO package:
    ```bash
-   sudo systemctl enable pigpiod
-   sudo systemctl start pigpiod
+   sudo apt-get update
+   sudo apt-get install python3-rpi.gpio
    ```
 
-4. Verify services are running:
+4. Verify I2C devices:
    ```bash
-   # Check GPIO daemon status
-   sudo systemctl status pigpiod
-   
-   # Check I2C devices
    i2cdetect -y 1
    ```
 
