@@ -12,6 +12,12 @@ A test interface for a behavioral system using Raspberry Pi 5 with OLED displays
   - GPIO 24: Left lever
   - GPIO 17: Nose poke
 
+### I2C Address Modification
+
+The right display I2C address was changed from 0x3D to 0x3C to avoid conflict with the left display.
+
+![I2C Address Modification](./static/i2c_addr.png)
+
 ## Initial Raspberry Pi Configuration
 
 1. Enable required interfaces:
