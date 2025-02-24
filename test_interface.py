@@ -48,8 +48,8 @@ class TestInterface:
         self.right_lever_state.config(text="down" if states['right_lever'] else "up")
         self.left_lever_state.config(text="down" if states['left_lever'] else "up")
         
-        # Update nose poke state (True = poked/triggered, False = empty)
-        self.nose_poke_state.config(text="poke!" if states['nose_poke'] else "empty")
+        # Update nose poke state (True = empty, False = poked)
+        self.nose_poke_state.config(text="empty" if states['nose_poke'] else "poke!")
     
     def poll_inputs(self):
         # Get current states
