@@ -1,22 +1,19 @@
-import RPi.GPIO as GPIO
+import lgpio
 import time
 
 def test_gpio():
     try:
-        # Print GPIO version
-        print(f"RPi.GPIO Version: {GPIO.VERSION}")
+        # Open GPIO chip
+        h = lgpio.gpiochip_open(0)
+        print("GPIO chip opened successfully")
         
-        # Set mode
-        GPIO.setmode(GPIO.BCM)
-        print("Mode set to BCM")
-        
-        # Test pin setup
+        # Configure test pin
         test_pin = 23
-        GPIO.setup(test_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        print(f"Pin {test_pin} setup complete")
+        lgpio.gpio_claim_input(h, test_pin)
+        print(f"Pin {test_pin} configured as input")
         
         # Read value
-        value = GPIO.input(test_pin)
+        value = lgpio.gpio_read(h, test_pin)
         print(f"Pin {test_pin} value: {value}")
         
         return True
@@ -25,7 +22,10 @@ def test_gpio():
         print(f"GPIO Test Failed: {str(e)}")
         return False
     finally:
-        GPIO.cleanup()
+        try:
+            lgpio.gpiochip_close(h)
+        except:
+            pass
 
 if __name__ == "__main__":
     test_gpio() 
