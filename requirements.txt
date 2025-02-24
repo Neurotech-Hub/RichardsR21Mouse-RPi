@@ -3,6 +3,7 @@ Pillow
 tk
 
 # Raspberry Pi specific requirements, only install on RPi
+pigpio; platform_system == "Linux"
 RPi.GPIO; platform_system == "Linux"
 adafruit-circuitpython-ssd1306; platform_system == "Linux"
 adafruit-blinka; platform_system == "Linux" 

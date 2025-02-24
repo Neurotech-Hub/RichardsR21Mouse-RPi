@@ -27,18 +27,24 @@ A test interface for a behavioral system using Raspberry Pi 5 with OLED displays
    sudo usermod -aG gpio,i2c $USER
    ```
 
-3. Reboot the Raspberry Pi:
+3. Enable and start GPIO system service:
    ```bash
-   sudo reboot
+   sudo systemctl enable pigpiod
+   sudo systemctl start pigpiod
    ```
 
-4. Verify permissions (after reboot):
+4. Verify services are running:
    ```bash
+   # Check GPIO daemon status
+   sudo systemctl status pigpiod
+   
    # Check I2C devices
    i2cdetect -y 1
-   
-   # Check GPIO access
-   ls -l /dev/gpiomem
+   ```
+
+5. Reboot the Raspberry Pi:
+   ```bash
+   sudo reboot
    ```
 
 ## Software Setup
