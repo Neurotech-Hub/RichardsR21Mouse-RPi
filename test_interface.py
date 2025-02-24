@@ -1,11 +1,16 @@
 import tkinter as tk
-from hardware.io_controller import IOController
+from tkinter import ttk
 import time
+
+from hardware.io_controller import IOController
 
 class TestInterface:
     def __init__(self, root):
         self.root = root
         self.root.title("Behavioral System Test Interface")
+        
+        # Configure style
+        self.setup_styles()
         
         # Initialize hardware interface
         self.io = IOController()
@@ -13,34 +18,88 @@ class TestInterface:
         # Create GUI elements
         self.create_widgets()
         
+        # Configure window
+        self.root.geometry("400x300")  # Set window size
+        self.root.resizable(False, False)  # Fix window size
+        
         # Start polling inputs
         self.poll_inputs()
     
+    def setup_styles(self):
+        # Configure ttk styles
+        style = ttk.Style()
+        style.configure('Header.TLabel', font=('Helvetica', 12, 'bold'))
+        style.configure('State.TLabel', font=('Helvetica', 10), padding=5)
+        style.configure('StateValue.TLabel', 
+                       font=('Helvetica', 10, 'bold'), 
+                       padding=5,
+                       width=10,
+                       anchor='center')
+        style.configure('Controls.TButton', 
+                       font=('Helvetica', 10),
+                       padding=10)
+    
     def create_widgets(self):
+        # Main container with padding
+        main_frame = ttk.Frame(self.root, padding="20")
+        main_frame.pack(fill="both", expand=True)
+        
+        # Title
+        title = ttk.Label(main_frame, 
+                         text="System Status Monitor",
+                         style='Header.TLabel')
+        title.pack(pady=(0, 20))
+        
         # Input state indicators
-        self.state_frame = tk.LabelFrame(self.root, text="Input States", padx=5, pady=5)
-        self.state_frame.pack(padx=10, pady=10, fill="x")
+        self.state_frame = ttk.LabelFrame(main_frame, 
+                                        text="Input States",
+                                        padding="10")
+        self.state_frame.pack(fill="x", pady=(0, 20))
+        
+        # Grid configuration
+        self.state_frame.columnconfigure(1, weight=1)
         
         # Right Lever
-        tk.Label(self.state_frame, text="Right Lever:").grid(row=0, column=0, sticky="e")
-        self.right_lever_state = tk.Label(self.state_frame, text="up", width=10)
-        self.right_lever_state.grid(row=0, column=1, padx=5)
+        ttk.Label(self.state_frame, 
+                 text="Right Lever:",
+                 style='State.TLabel').grid(row=0, column=0, sticky="e")
+        self.right_lever_state = ttk.Label(self.state_frame,
+                                         text="up",
+                                         style='StateValue.TLabel')
+        self.right_lever_state.grid(row=0, column=1, sticky="ew", padx=5)
         
         # Left Lever
-        tk.Label(self.state_frame, text="Left Lever:").grid(row=1, column=0, sticky="e")
-        self.left_lever_state = tk.Label(self.state_frame, text="up", width=10)
-        self.left_lever_state.grid(row=1, column=1, padx=5)
+        ttk.Label(self.state_frame,
+                 text="Left Lever:",
+                 style='State.TLabel').grid(row=1, column=0, sticky="e")
+        self.left_lever_state = ttk.Label(self.state_frame,
+                                        text="up",
+                                        style='StateValue.TLabel')
+        self.left_lever_state.grid(row=1, column=1, sticky="ew", padx=5)
         
         # Nose Poke
-        tk.Label(self.state_frame, text="Nose Poke:").grid(row=2, column=0, sticky="e")
-        self.nose_poke_state = tk.Label(self.state_frame, text="empty", width=10)
-        self.nose_poke_state.grid(row=2, column=1, padx=5)
+        ttk.Label(self.state_frame,
+                 text="Nose Poke:",
+                 style='State.TLabel').grid(row=2, column=0, sticky="e")
+        self.nose_poke_state = ttk.Label(self.state_frame,
+                                       text="empty",
+                                       style='StateValue.TLabel')
+        self.nose_poke_state.grid(row=2, column=1, sticky="ew", padx=5)
+        
+        # Add some vertical spacing between rows
+        for row in range(3):
+            ttk.Frame(self.state_frame).grid(row=row, column=0, pady=5)
         
         # Display controls
-        self.display_frame = tk.LabelFrame(self.root, text="Display Controls", padx=5, pady=5)
-        self.display_frame.pack(padx=10, pady=10, fill="x")
+        self.display_frame = ttk.LabelFrame(main_frame,
+                                          text="Display Controls",
+                                          padding="10")
+        self.display_frame.pack(fill="x")
         
-        self.clear_button = tk.Button(self.display_frame, text="Clear Displays", command=self.clear_displays)
+        self.clear_button = ttk.Button(self.display_frame,
+                                     text="Clear Displays",
+                                     style='Controls.TButton',
+                                     command=self.clear_displays)
         self.clear_button.pack(pady=5)
     
     def update_state_display(self, states):
