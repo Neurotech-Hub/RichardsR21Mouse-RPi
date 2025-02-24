@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import time
+from PIL import Image, ImageDraw
 
 from hardware.io_controller import IOController
 
@@ -96,11 +97,21 @@ class TestInterface:
                                           padding="10")
         self.display_frame.pack(fill="x")
         
-        self.clear_button = ttk.Button(self.display_frame,
+        # Button container for horizontal layout
+        button_frame = ttk.Frame(self.display_frame)
+        button_frame.pack(pady=5)
+        
+        self.test_button = ttk.Button(button_frame,
+                                    text="Test Pattern",
+                                    style='Controls.TButton',
+                                    command=self.test_displays)
+        self.test_button.pack(side='left', padx=5)
+        
+        self.clear_button = ttk.Button(button_frame,
                                      text="Clear Displays",
                                      style='Controls.TButton',
                                      command=self.clear_displays)
-        self.clear_button.pack(pady=5)
+        self.clear_button.pack(side='left', padx=5)
     
     def update_state_display(self, states):
         # Update lever states (True = pressed/down, False = released/up)
@@ -120,6 +131,24 @@ class TestInterface:
     
     def clear_displays(self):
         self.io.clear_displays()
+    
+    def test_displays(self):
+        """Draw test pattern on both displays"""
+        # Create test pattern
+        image = Image.new('1', (128, 64), 0)  # '1' = binary mode
+        draw = ImageDraw.Draw(image)
+        
+        # Draw some test patterns
+        draw.rectangle([0, 0, 127, 63], outline=1)  # Border
+        draw.line([0, 0, 127, 63], fill=1)  # Diagonal line
+        draw.line([0, 63, 127, 0], fill=1)  # Diagonal line
+        draw.rectangle([32, 16, 96, 48], fill=1)  # Center rectangle
+        
+        # Display on both screens
+        self.io.display_left.image(image)
+        self.io.display_right.image(image)
+        self.io.display_left.show()
+        self.io.display_right.show()
 
 def main():
     root = tk.Tk()
