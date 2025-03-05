@@ -87,6 +87,17 @@ class TestInterface:
                                        style='StateValue.TLabel')
         self.nose_poke_state.grid(row=2, column=1, sticky="ew", padx=5)
         
+        # Water Port Control
+        ttk.Label(self.state_frame,
+                 text="Water Port:",
+                 style='State.TLabel').grid(row=3, column=0, sticky="e")
+        
+        self.water_button = ttk.Button(self.state_frame,
+                                     text="OFF",
+                                     style='Controls.TButton',
+                                     command=self.toggle_water)
+        self.water_button.grid(row=3, column=1, sticky="ew", padx=5)
+        
         # Add some vertical spacing between rows
         for row in range(3):
             ttk.Frame(self.state_frame).grid(row=row, column=0, pady=5)
@@ -120,6 +131,9 @@ class TestInterface:
         
         # Update nose poke state (True = empty, False = poked)
         self.nose_poke_state.config(text="empty" if states['nose_poke'] else "poke!")
+        
+        # Update water port button state
+        self.water_button.config(text="ON" if states['water_port'] else "OFF")
     
     def poll_inputs(self):
         # Get current states
@@ -149,6 +163,13 @@ class TestInterface:
         self.io.display_right.image(image)
         self.io.display_left.show()
         self.io.display_right.show()
+    
+    def toggle_water(self):
+        """Toggle water port state"""
+        current_state = self.io.get_input_states()['water_port']
+        new_state = not current_state
+        self.io.set_water_port(new_state)
+        self.water_button.config(text="ON" if new_state else "OFF")
 
 def main():
     root = tk.Tk()

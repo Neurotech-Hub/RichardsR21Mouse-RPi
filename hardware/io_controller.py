@@ -1,5 +1,5 @@
 try:
-    from gpiozero import Button
+    from gpiozero import Button, DigitalOutputDevice
     from board import SCL, SDA
     import busio
     import adafruit_ssd1306
@@ -14,6 +14,7 @@ class IOController:
         self.PIN_LEVER_RIGHT = 23
         self.PIN_LEVER_LEFT = 24
         self.PIN_NOSE_POKE = 17
+        self.PIN_WATER = 25
         
         if not SIMULATION_MODE:
             try:
@@ -25,17 +26,20 @@ class IOController:
                 self.display_right = self._init_display(i2c, 0x3D, "right")
                 
                 try:
-                    # Setup GPIO using gpiozero (pull_up=True by default)
+                    # Setup GPIO inputs using gpiozero (pull_up=True by default)
                     self.lever_right = Button(self.PIN_LEVER_RIGHT)
                     self.lever_left = Button(self.PIN_LEVER_LEFT)
                     self.nose_poke = Button(self.PIN_NOSE_POKE)
                     
+                    # Setup water port output
+                    self.water_port = DigitalOutputDevice(self.PIN_WATER, initial_value=False)
+                    
                     self._simulated_inputs = False
-                    print("GPIO inputs initialized successfully")
+                    print("GPIO inputs and outputs initialized successfully")
                     
                 except Exception as e:
-                    print(f"Failed to initialize GPIO inputs: {e}")
-                    print("Switching to simulation mode for inputs")
+                    print(f"Failed to initialize GPIO: {e}")
+                    print("Switching to simulation mode for GPIO")
                     self._init_simulated_inputs()
                     
             except (ValueError, OSError) as e:
@@ -62,7 +66,8 @@ class IOController:
         self._simulated_states = {
             'right_lever': False,
             'left_lever': False,
-            'nose_poke': False
+            'nose_poke': False,
+            'water_port': False
         }
     
     def _init_simulation(self):
@@ -76,7 +81,8 @@ class IOController:
             return {
                 'right_lever': self.lever_right.is_pressed,
                 'left_lever': self.lever_left.is_pressed,
-                'nose_poke': self.nose_poke.is_pressed
+                'nose_poke': self.nose_poke.is_pressed,
+                'water_port': self.water_port.value
             }
         else:
             return self._simulated_states
@@ -86,6 +92,13 @@ class IOController:
         self.display_right.fill(0)
         self.display_left.show()
         self.display_right.show()
+    
+    def set_water_port(self, state):
+        """Control water port state"""
+        if not hasattr(self, '_simulated_inputs') or not self._simulated_inputs:
+            self.water_port.value = state
+        else:
+            self._simulated_states['water_port'] = state
     
     def __del__(self):
         """Cleanup GPIO on object destruction"""

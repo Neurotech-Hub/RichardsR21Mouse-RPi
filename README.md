@@ -11,6 +11,8 @@ A test interface for a behavioral system using Raspberry Pi 5 with OLED displays
   - GPIO 23: Right lever
   - GPIO 24: Left lever
   - GPIO 17: Nose poke
+- GPIO outputs
+  - GPIO 25: Water port
 
 ### I2C Address Modification
 
@@ -83,6 +85,7 @@ The right display I2C address was changed from 0x3D to 0x3C to avoid conflict wi
 
 The GUI interface provides:
 - Real-time monitoring of input states (levers and nose poke)
+- Water port control (toggle on/off)
 - Display test patterns for both OLED screens
 - Display clearing functionality
 
