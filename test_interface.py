@@ -20,7 +20,7 @@ class TestInterface:
         self.create_widgets()
         
         # Configure window
-        self.root.geometry("400x300")  # Set window size
+        self.root.geometry("400x400")  # Increased height from 300 to 400
         self.root.resizable(False, False)  # Fix window size
         
         # Start polling inputs
@@ -49,13 +49,13 @@ class TestInterface:
         title = ttk.Label(main_frame, 
                          text="System Status Monitor",
                          style='Header.TLabel')
-        title.pack(pady=(0, 20))
+        title.pack(pady=(0, 10))  # Reduced top padding
         
         # Input state indicators
         self.state_frame = ttk.LabelFrame(main_frame, 
                                         text="Input States",
                                         padding="10")
-        self.state_frame.pack(fill="x", pady=(0, 20))
+        self.state_frame.pack(fill="x", pady=(0, 10))  # Reduced padding
         
         # Grid configuration
         self.state_frame.columnconfigure(1, weight=1)
@@ -106,23 +106,27 @@ class TestInterface:
         self.display_frame = ttk.LabelFrame(main_frame,
                                           text="Display Controls",
                                           padding="10")
-        self.display_frame.pack(fill="x")
+        self.display_frame.pack(fill="x", pady=(0, 10), expand=True)  # Added expand=True
         
         # Button container for horizontal layout
         button_frame = ttk.Frame(self.display_frame)
-        button_frame.pack(pady=5)
+        button_frame.pack(fill="x", pady=5)  # Added fill="x"
+        
+        # Center the buttons
+        button_frame.columnconfigure(0, weight=1)
+        button_frame.columnconfigure(3, weight=1)
         
         self.test_button = ttk.Button(button_frame,
                                     text="Test Pattern",
                                     style='Controls.TButton',
                                     command=self.test_displays)
-        self.test_button.pack(side='left', padx=5)
+        self.test_button.grid(row=0, column=1, padx=5)  # Changed to grid
         
         self.clear_button = ttk.Button(button_frame,
                                      text="Clear Displays",
                                      style='Controls.TButton',
                                      command=self.clear_displays)
-        self.clear_button.pack(side='left', padx=5)
+        self.clear_button.grid(row=0, column=2, padx=5)  # Changed to grid
     
     def update_state_display(self, states):
         # Update lever states (True = pressed/down, False = released/up)
